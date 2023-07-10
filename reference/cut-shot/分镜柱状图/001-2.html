@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>001-2 Bar Chart</title>
+  <style>
+    body {
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    #chart-container {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="chart-container">
+    <svg width="1200" height="700">
+      <g class="bar-chart"></g>
+    </svg>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const dataset = [179, 215, 213, 117, 208, 322, 246, 175, 758, 144, 272, 279, 92, 273, 18, 22, 103, 88, 85, 22, 125, 32, 139, 158];
+    const width = 1200;
+    const height = 700;
+    const margin = { top: 30, right: 30, bottom: 50, left: 50 };
+    const color = "#90e0ef";
+
+    const svg = d3.select("#chart-container svg");
+    const xScale = d3.scaleBand()
+      .domain(dataset.map((d, i) => i))
+      .range([margin.left, width - margin.right])
+      .padding(0.1);
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(dataset)])
+      .range([height - margin.bottom, margin.top]);
+
+    svg.selectAll("rect")
+      .data(dataset)
+      .enter()
+      .append("rect")
+      .attr("x", (d, i) => xScale(i))
+      .attr("y", (d) => yScale(d))
+      .attr("width", xScale.bandwidth())
+      .attr("height", (d) => height - margin.bottom - yScale(d))
+      .attr("fill", color);
+
+    svg.selectAll("text")
+      .data(dataset)
+      .enter()
+      .append("text")
+      .text((d) => d)
+      .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+      .attr("y", (d) => yScale(d) - 5)
+      .attr("text-anchor", "middle")
+      .attr("font-size", 12)
+      .attr("fill", "black");
+  </script>
+</body>
+</html>

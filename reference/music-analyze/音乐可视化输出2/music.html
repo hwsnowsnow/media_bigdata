@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+     <meta charset="utf-8">
+   <title>
+      音乐可视化
+   </title>
+  </head>
+  <body>
+      <div align="right">
+           <audio id="audioElement" src="002.mp3" controls="controls"></audio>
+      </div>
+      <svg id="wcSvg" width="1000" height="500" version="1.1" xmlns="http://www.w3.org/2000/svg"></svg>
+      <script>
+         //audio元素能够播放声音文件或者音频流,抱歉我忘了html的注释方法了，上面那句话是添加一个音频控件，并且关联音频文件
+         var w=window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth;
+         var h=window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight;
+         console.log("w="+w+";h="+h);
+          var x=w*0.98/100,y=500;
+         var mysvg = document.getElementById("wcSvg");
+         mysvg.setAttribute("width", w*0.98);
+         //
+         var svgrec= new Array();
+         for(var i=0;i<100;i++){
+            svgrec[i] = document.createElement("rect");//为数组元素创建节点rect
+            mysvg.appendChild(svgrec[i]);
+            //获取的矩阵svg的子节点为数组元素的节点
+            var h=0;
+            svgrec[i].outerHTML="<rect x="+(i*x)+" y="+(y-h)+" width="+(x*0.9)+" height="+(h)+" style='fill:rgba("+(i*1.5)+","+(100+i*1.5)+","+(200-i)+",0.7)'>";
+            //rgba,第四位是透明度，我采用渐变色了,也可以改成固定配色
+            //设置矩形的方位：x为i乘以x，y为900减去高度，fill填充色
+         }
+         //取音乐的频率
+          var audioCtx = new (window.AudioContext || window.webkitAudioContext)();//这个在Google浏览器会报错，就是要点击后才能播放，所以我换了一个浏览器
+         //创建了一个AudioContext
+          var audioElement = document.getElementById('audioElement');
+          //选择音乐，这个就是前面的音乐的id
+          console.log(audioElement[0]);//打印信息，采样率，是否运行，运行到的时间等信息，我没用chrome浏览器，所以没看见
+          var audioSrc = audioCtx.createMediaElementSource(audioElement);//这是一个音频源节点的参数，它的上下文为AudioContext，
+          var analyser = audioCtx.createAnalyser();//创建音频分析器，分析上下文的频率数据
+          audioSrc.connect(analyser);
+          audioSrc.connect(audioCtx.destination);
+          //
+          var myhist = document.getElementsByTagName("rect");//选择rect节点
+          var frequencyData = new Uint8Array(100);//8 位无符号整数值的类型化数组。创建长度为100的
+         //
+          function everyViz(){
+            analyser.getByteFrequencyData(frequencyData);//把获取到的频谱数据，映射到直方图矩形的高度和坐标起点上
+            //
+            for(var idx in myhist) {//rect节点一个个选过去
+               if (myhist[idx].getAttribute && frequencyData[idx])
+               {
+                  myhist[idx].setAttribute("y", y-frequencyData[idx]);//重新设置y和height
+                  myhist[idx].setAttribute("height", frequencyData[idx]);
+                  //myhist[idx].setAttribute("fill",rgb(0,0, frequencyData[idx]));
+               }
+            }
+         }
+         window.setInterval(everyViz, 20);//每隔20毫秒调用一次函数
+   </script>
+  </body>
+</html>
